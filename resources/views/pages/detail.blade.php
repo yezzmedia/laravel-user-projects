@@ -10,16 +10,14 @@
             <x-slot:icon><x-user-projects::icon name="exclamation-triangle" class="h-5 w-5" /></x-slot:icon>
         </x-user-projects::page-header>
     @else
-        <x-user-projects::hero
+        <x-user-projects::page-header
             :title="$project->name"
-            :subtitle="$project->description ?? __('user-projects::ui.project_overview_description')"
+            :subtitle="$project->description ?: __('user-projects::ui.project_overview_description')"
             color="indigo"
         >
-            <x-slot:avatar>
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-md">
-                    {{ strtoupper(substr($project->name, 0, 2)) }}
-                </div>
-            </x-slot:avatar>
+            <x-slot:icon>
+                <span class="text-lg font-bold">{{ strtoupper(substr($project->name, 0, 2)) }}</span>
+            </x-slot:icon>
             <x-slot:badges>
                 <x-user-projects::badge :class="$project->status === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'">
                     {{ ucfirst($project->status) }}
@@ -35,7 +33,7 @@
                     {{ __('user-projects::ui.projects') }}
                 </button>
             </x-slot:actions>
-        </x-user-projects::hero>
+        </x-user-projects::page-header>
 
         <div class="flex gap-1 border border-gray-200 bg-white p-1 shadow-sm dark:border-gray-700 dark:bg-gray-900">
             @foreach (['overview' => __('user-projects::ui.overview'), 'members' => __('user-projects::ui.members'), 'settings' => __('user-projects::ui.settings')] as $tab => $label)
@@ -54,10 +52,10 @@
         @if ($activeTab === 'overview')
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                    <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-fuchsia-50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-fuchsia-950/30">
-                        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('user-projects::ui.details') }}</h2>
+                    <div class="px-4 pt-4 sm:px-6 sm:pt-6">
+                        <x-user-projects::section-header :title="__('user-projects::ui.details')" color="indigo" />
                     </div>
-                    <div class="p-4 sm:p-6">
+                    <div class="p-4 sm:p-6 pt-0">
                         <div class="grid gap-4 sm:grid-cols-2">
                             <x-user-projects::stat-card :label="__('user-projects::ui.members')" :value="$members->count()" />
                             <div class="border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
@@ -70,10 +68,10 @@
                 </div>
 
                 <div class="border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                    <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-fuchsia-50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-fuchsia-950/30">
-                        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('user-projects::ui.info') }}</h2>
+                    <div class="px-4 pt-4 sm:px-6 sm:pt-6">
+                        <x-user-projects::section-header :title="__('user-projects::ui.info')" color="indigo" />
                     </div>
-                    <div class="p-4 sm:p-6 space-y-4">
+                    <div class="p-4 sm:p-6 pt-0 space-y-4">
                         <div>
                             <p class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('user-projects::ui.projects') }}</p>
                             <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $project->name }}</p>
@@ -97,10 +95,10 @@
 
         @if ($activeTab === 'members')
             <div class="border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-fuchsia-50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-fuchsia-950/30">
-                    <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('user-projects::ui.team_members') }}</h2>
+                <div class="px-4 pt-4 sm:px-6 sm:pt-6">
+                    <x-user-projects::section-header :title="__('user-projects::ui.team_members')" color="indigo" />
                 </div>
-                <div class="p-4 sm:p-6">
+                <div class="p-4 sm:p-6 pt-0">
                     @if ($members->isNotEmpty())
                         <div class="-mx-4 -mb-4 overflow-hidden sm:-mx-6 sm:-mb-6">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -144,10 +142,10 @@
         @if ($activeTab === 'settings')
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                    <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-fuchsia-50 px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-fuchsia-950/30">
-                        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('user-projects::ui.details') }}</h2>
+                    <div class="px-4 pt-4 sm:px-6 sm:pt-6">
+                        <x-user-projects::section-header :title="__('user-projects::ui.details')" color="indigo" />
                     </div>
-                    <div class="p-4 sm:p-6 space-y-4">
+                    <div class="p-4 sm:p-6 pt-0 space-y-4">
                         <div>
                             <p class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Project ID</p>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 font-mono break-all">{{ $project->id }}</p>
@@ -160,10 +158,10 @@
                 </div>
 
                 <div class="border border-rose-200 bg-white shadow-sm dark:border-rose-900 dark:bg-gray-900">
-                    <div class="bg-gradient-to-r from-rose-50 via-red-50 to-pink-50 px-6 py-4 border-b border-rose-200 dark:border-rose-900 dark:from-rose-950/30 dark:via-red-950/30 dark:to-pink-950/30">
-                        <h2 class="text-sm font-semibold text-rose-700 dark:text-rose-300">{{ __('user-projects::ui.danger_zone') }}</h2>
+                    <div class="px-4 pt-4 sm:px-6 sm:pt-6">
+                        <x-user-projects::section-header :title="__('user-projects::ui.danger_zone')" color="rose" />
                     </div>
-                    <div class="p-4 sm:p-6">
+                    <div class="p-4 sm:p-6 pt-0">
                         <p class="text-sm text-rose-600 dark:text-rose-300">Once you delete a project, there is no going back. Please be certain.</p>
                         <button type="button" wire:click="deleteProject('{{ $project->getRouteKey() }}')" wire:confirm="Are you sure you want to delete this project?"
                             class="mt-4 inline-flex items-center gap-1.5 border border-rose-300 bg-white px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
