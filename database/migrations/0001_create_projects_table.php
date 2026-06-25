@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('projects', static function (Blueprint $table): void {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->foreignId('owner_id')->constrained('users');
             $table->string('name');
             $table->text('description')->nullable();

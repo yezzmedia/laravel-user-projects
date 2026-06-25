@@ -52,7 +52,7 @@ it('finds project by identifier', function (): void {
     $found = app(ProjectManager::class)->findByIdentifier((string) $project->id);
 
     expect($found)->not->toBeNull()
-        ->and($found->id)->toBe((string) $project->id);
+        ->and((string) $found->id)->toBe((string) $project->id);
 });
 
 it('updates a project', function (): void {
