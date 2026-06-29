@@ -9,7 +9,7 @@ use YezzMedia\UserProjects\Support\ProjectManager;
 
 final class ProjectsDashboardWidget extends Widget
 {
-    protected static string $view = 'user-projects::widgets.projects-dashboard';
+    protected string $view = 'user-projects::widgets.projects-dashboard';
 
     public function getProjects(): array
     {
