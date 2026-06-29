@@ -14,6 +14,10 @@ return [
 
     'projects' => [
         'display_limit' => 25,
+        'statuses' => [
+            'active' => 'Active',
+            'archived' => 'Archived',
+        ],
     ],
 
     'members' => [
@@ -21,6 +25,11 @@ return [
             'owner' => 'Owner',
             'admin' => 'Admin',
             'member' => 'Member',
+        ],
+        'role_weights' => [
+            'owner' => 100,
+            'admin' => 50,
+            'member' => 10,
         ],
     ],
 

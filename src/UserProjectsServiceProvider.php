@@ -13,6 +13,9 @@ use YezzMedia\Foundation\Support\PlatformPackageRegistrar;
 use YezzMedia\UserProjects\Actions\CreateRoleAction;
 use YezzMedia\UserProjects\Actions\DeleteRoleAction;
 use YezzMedia\UserProjects\Actions\UpdateRoleAction;
+use YezzMedia\UserProjects\Filament\Widgets\ProjectsDashboardWidget;
+use YezzMedia\UserProjects\Support\InstalledAddonRegistry;
+use YezzMedia\UserProjects\Support\ProjectAddonManager;
 use YezzMedia\UserProjects\Support\ProjectManager;
 use YezzMedia\UserProjects\Support\ProjectMemberManager;
 use YezzMedia\UserProjects\Support\ProjectNavigationManager;
@@ -30,6 +33,11 @@ class UserProjectsServiceProvider extends PackageServiceProvider
             ->hasMigration('0001_create_projects_table')
             ->hasMigration('0002_create_project_members_table')
             ->hasMigration('0003_create_project_roles_table')
+            ->hasMigration('0004_create_project_addon_activations_table')
+            ->hasMigration('0005_create_installed_addons_table')
+            ->hasMigration('0006_create_project_invitations_table')
+            ->hasMigration('0007_create_project_activities_table')
+            ->hasMigration('0008_add_photo_to_projects_table')
             ->hasViews();
     }
 
@@ -41,6 +49,10 @@ class UserProjectsServiceProvider extends PackageServiceProvider
         $this->app->singleton(ProjectNavigationManager::class);
         $this->app->singleton(ProjectRoleManager::class);
         $this->app->singleton(ProjectStatsService::class);
+        $this->app->singleton(ProjectAddonManager::class);
+        $this->app->singleton(InstalledAddonRegistry::class);
+
+        $this->app->singleton(ProjectsDashboardWidget::class);
 
         $this->app->singleton(CreateRoleAction::class);
         $this->app->singleton(UpdateRoleAction::class);
@@ -61,6 +73,13 @@ class UserProjectsServiceProvider extends PackageServiceProvider
         }
 
         $this->loadTranslationsFrom($this->package->basePath('/../resources/lang'), 'user-projects');
+
+        $this->mergeConfigFrom($this->package->basePath('/../config/user-projects.php'), 'user-projects');
+
+        config(['dashboard.widgets' => array_merge(
+            config('dashboard.widgets', []),
+            [ProjectsDashboardWidget::class],
+        )]);
 
         if (class_exists(DashboardNavigationRegistry::class)) {
             $registry = $this->app->make(DashboardNavigationRegistry::class);

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace YezzMedia\UserProjects\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 final class Project extends Model
 {
-    use HasUuids;
-
     protected $table = 'projects';
 
     protected $fillable = [
@@ -20,10 +18,15 @@ final class Project extends Model
         'description',
         'owner_id',
         'status',
+        'photo_path',
     ];
 
     protected $casts = [
         'status' => 'string',
+    ];
+
+    protected $appends = [
+        'photo_url',
     ];
 
     public function owner(): BelongsTo
@@ -34,6 +37,25 @@ final class Project extends Model
     public function members(): HasMany
     {
         return $this->hasMany(ProjectMember::class);
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(ProjectInvitation::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(ProjectActivity::class);
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if ($this->photo_path === null) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->photo_path);
     }
 
     public function isOwner(mixed $user): bool

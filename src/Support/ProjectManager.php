@@ -7,6 +7,7 @@ namespace YezzMedia\UserProjects\Support;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Collection;
 use YezzMedia\UserProjects\Models\Project;
+use YezzMedia\UserProjects\Models\ProjectActivity;
 use YezzMedia\UserProjects\Models\ProjectMember;
 
 final class ProjectManager
@@ -50,6 +51,13 @@ final class ProjectManager
             'role' => 'owner',
         ]);
 
+        ProjectActivity::log(
+            $project->id,
+            'project_created',
+            __('user-projects::ui.activity_project_created'),
+            (int) $user->getAuthIdentifier(),
+        );
+
         return $project;
     }
 
@@ -60,9 +68,36 @@ final class ProjectManager
 
     public function delete(Project $project): bool
     {
+        $projectId = $project->id;
+
         $project->members()->delete();
+        $project->activities()->delete();
 
         return (bool) $project->delete();
+    }
+
+    public function duplicate(Project $project, Authenticatable $user, ?string $suffix = null): Project
+    {
+        $copy = $this->create(
+            $user,
+            ($suffix !== null) ? $project->name.' '.$suffix : $project->name.' (Copy)',
+            $project->description,
+        );
+
+        return $copy;
+    }
+
+    public function transferOwnership(Project $project, int $newOwnerUserId, int $currentOwnerUserId): bool
+    {
+        $project->members()
+            ->where('user_id', $newOwnerUserId)
+            ->update(['role' => 'owner']);
+
+        $project->members()
+            ->where('user_id', $currentOwnerUserId)
+            ->update(['role' => 'admin']);
+
+        return (bool) $project->update(['owner_id' => $newOwnerUserId]);
     }
 
     public function findByIdentifier(string $identifier): ?Project
