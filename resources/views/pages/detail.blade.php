@@ -75,14 +75,16 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <button type="button" wire:click="acceptMyInvitation"
-                            class="inline-flex items-center gap-1.5 border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50 dark:border-amber-600 dark:bg-gray-800 dark:text-amber-300 dark:hover:bg-amber-900/20">
-                            <x-user-projects::icon name="check" class="h-3.5 w-3.5" />
+                        <button type="button" wire:click="acceptMyInvitation" wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-50 dark:border-amber-600 dark:bg-gray-800 dark:text-amber-300 dark:hover:bg-amber-900/20">
+                            <span wire:loading.remove wire:target="acceptMyInvitation"><x-user-projects::icon name="check" class="h-3.5 w-3.5" /></span>
+                            <span wire:loading wire:target="acceptMyInvitation"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
                             {{ __('user-projects::ui.accept') }}
                         </button>
-                        <button type="button" wire:click="declineMyInvitation" wire:confirm="{{ __('user-projects::ui.decline_invitation_confirm') }}"
-                            class="inline-flex items-center gap-1.5 border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
-                            <x-user-projects::icon name="x" class="h-3.5 w-3.5" />
+                        <button type="button" wire:click="declineMyInvitation" wire:confirm="{{ __('user-projects::ui.decline_invitation_confirm') }}" wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                            <span wire:loading.remove wire:target="declineMyInvitation"><x-user-projects::icon name="x" class="h-3.5 w-3.5" /></span>
+                            <span wire:loading wire:target="declineMyInvitation"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
                             {{ __('user-projects::ui.decline') }}
                         </button>
                     </div>
@@ -161,10 +163,11 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <button type="button" wire:click="inviteMember"
-                                class="inline-flex items-center gap-1.5 border border-indigo-300 bg-white px-4 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
+                            <button type="button" wire:click="inviteMember" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-1.5 border border-indigo-300 bg-white px-4 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
                                 <x-user-projects::icon name="plus" class="h-3.5 w-3.5" />
-                                {{ __('user-projects::ui.invite') }}
+                                <span wire:loading.remove wire:target="inviteMember">{{ __('user-projects::ui.invite') }}</span>
+                                <span wire:loading wire:target="inviteMember" class="inline-flex items-center gap-1"><x-user-projects::icon name="loader" class="h-3 w-3 animate-spin" /> {{ __('user-projects::ui.inviting') }}</span>
                             </button>
                         </div>
                     </div>
@@ -305,9 +308,10 @@
                     <div class="p-4 sm:p-6">
                         <p class="text-sm font-semibold text-rose-700 dark:text-rose-300">{{ __('user-projects::ui.leave_project_title') }}</p>
                         <p class="mt-1 text-xs text-rose-600 dark:text-rose-400">{{ __('user-projects::ui.leave_project_description') }}</p>
-                        <button type="button" wire:click="leaveProject" wire:confirm="{{ __('user-projects::ui.leave_project_confirm') }}"
-                            class="mt-3 inline-flex items-center gap-1.5 border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
-                            <x-user-projects::icon name="arrow-left-on-rectangle" class="h-3.5 w-3.5" />
+                        <button type="button" wire:click="leaveProject" wire:confirm="{{ __('user-projects::ui.leave_project_confirm') }}" wire:loading.attr="disabled"
+                            class="mt-3 inline-flex items-center gap-1.5 border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
+                            <span wire:loading.remove wire:target="leaveProject"><x-user-projects::icon name="arrow-left-on-rectangle" class="h-3.5 w-3.5" /></span>
+                            <span wire:loading wire:target="leaveProject"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
                             {{ __('user-projects::ui.leave_project') }}
                         </button>
                     </div>
@@ -321,41 +325,45 @@
                     <x-user-projects::section-header :title="__('user-projects::ui.addons')" color="indigo" />
                 </div>
                 <div class="p-4 sm:p-6 pt-0">
-                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($availableAddons as $addon)
-                            @php
-                                $isActive = $addonActivations[$addon->key] ?? false;
-                            @endphp
-                            <div class="relative border p-4 @if ($isActive) border-indigo-300 bg-indigo-50/30 dark:border-indigo-700 dark:bg-indigo-950/20 @else border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 @endif">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <x-user-projects::icon :name="$addon->icon" class="h-5 w-5 shrink-0 text-gray-400" />
-                                        <div class="min-w-0">
-                                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $addon->label }}</h3>
-                                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ $addon->description }}</p>
+                    @if (! empty($availableAddons))
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($availableAddons as $addon)
+                                @php
+                                    $isActive = $addonActivations[$addon->key] ?? false;
+                                @endphp
+                                <div class="relative border p-4 @if ($isActive) border-indigo-300 bg-indigo-50/30 dark:border-indigo-700 dark:bg-indigo-950/20 @else border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 @endif">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <x-user-projects::icon :name="$addon->icon" class="h-5 w-5 shrink-0 text-gray-400" />
+                                            <div class="min-w-0">
+                                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $addon->label }}</h3>
+                                                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ $addon->description }}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <button type="button" wire:click="toggleAddon('{{ $addon->key }}')"
-                                        @class([
-                                            'shrink-0 relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                                            'bg-indigo-600' => $isActive,
-                                            'bg-gray-200 dark:bg-gray-600' => ! $isActive,
-                                        ])
-                                        role="switch"
-                                        aria-checked="{{ $isActive ? 'true' : 'false' }}"
-                                    >
-                                        <span
+                                        <button type="button" wire:click="toggleAddon('{{ $addon->key }}')"
                                             @class([
-                                                'pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                                                'translate-x-5' => $isActive,
-                                                'translate-x-0' => ! $isActive,
+                                                'shrink-0 relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                                                'bg-indigo-600' => $isActive,
+                                                'bg-gray-200 dark:bg-gray-600' => ! $isActive,
                                             ])
-                                        ></span>
-                                    </button>
+                                            role="switch"
+                                            aria-checked="{{ $isActive ? 'true' : 'false' }}"
+                                        >
+                                            <span
+                                                @class([
+                                                    'pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                                                    'translate-x-5' => $isActive,
+                                                    'translate-x-0' => ! $isActive,
+                                                ])
+                                            ></span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <x-user-projects::empty-state :title="__('user-projects::ui.no_addons')" icon="puzzle-block" />
+                    @endif
                 </div>
             </div>
         @endif
@@ -366,6 +374,14 @@
                     <x-user-projects::section-header :title="__('user-projects::ui.activity')" color="indigo" />
                 </div>
                 <div class="p-4 sm:p-6 pt-0">
+                    <div class="mb-4">
+                        <select wire:model.live="activityFilter"
+                            class="block w-full max-w-xs border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-indigo-400">
+                            @foreach ($activityTypes as $type => $label)
+                                <option value="{{ $type }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     @if ($activities->isNotEmpty())
                         <div class="relative">
                             <div class="absolute left-4 top-2 bottom-2 w-px bg-gray-200 dark:bg-gray-700"></div>
@@ -446,15 +462,17 @@
                                         @enderror
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <button type="button" wire:click="saveProjectPhoto"
-                                            class="inline-flex items-center gap-1 border border-indigo-300 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
-                                            <x-user-projects::icon name="check" class="h-3 w-3" />
+                                        <button type="button" wire:click="saveProjectPhoto" wire:loading.attr="disabled"
+                                            class="inline-flex items-center gap-1 border border-indigo-300 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
+                                            <span wire:loading.remove wire:target="saveProjectPhoto"><x-user-projects::icon name="check" class="h-3 w-3" /></span>
+                                            <span wire:loading wire:target="saveProjectPhoto"><x-user-projects::icon name="loader" class="h-3 w-3 animate-spin" /></span>
                                             {{ __('user-projects::ui.upload') }}
                                         </button>
                                         @if ($project->photo_path)
-                                            <button type="button" wire:click="removeProjectPhoto" wire:confirm="{{ __('user-projects::ui.remove_photo_confirm') }}"
-                                                class="inline-flex items-center gap-1 border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
-                                                <x-user-projects::icon name="trash" class="h-3 w-3" />
+                                            <button type="button" wire:click="removeProjectPhoto" wire:confirm="{{ __('user-projects::ui.remove_photo_confirm') }}" wire:loading.attr="disabled"
+                                                class="inline-flex items-center gap-1 border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
+                                                <span wire:loading.remove wire:target="removeProjectPhoto"><x-user-projects::icon name="trash" class="h-3 w-3" /></span>
+                                                <span wire:loading wire:target="removeProjectPhoto"><x-user-projects::icon name="loader" class="h-3 w-3 animate-spin" /></span>
                                                 {{ __('user-projects::ui.remove') }}
                                             </button>
                                         @endif
@@ -514,9 +532,10 @@
                             </div>
 
                             <div class="pt-2">
-                                <button type="submit"
-                                    class="inline-flex items-center gap-1.5 border border-indigo-300 bg-white px-3 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
-                                    <x-user-projects::icon name="check" class="h-3.5 w-3.5" />
+                                <button type="submit" wire:loading.attr="disabled"
+                                    class="inline-flex items-center gap-1.5 border border-indigo-300 bg-white px-3 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
+                                    <span wire:loading.remove wire:target="saveProjectSettings"><x-user-projects::icon name="check" class="h-3.5 w-3.5" /></span>
+                                    <span wire:loading wire:target="saveProjectSettings"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
                                     {{ __('user-projects::ui.save_changes') }}
                                 </button>
                             </div>
@@ -530,9 +549,10 @@
                     </div>
                     <div class="p-4 sm:p-6 pt-0">
                         <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('user-projects::ui.duplicate_project_description') }}</p>
-                        <button type="button" wire:click="duplicateProject"
-                            class="mt-4 inline-flex items-center gap-1.5 border border-indigo-300 bg-white px-3 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
-                            <x-user-projects::icon name="document-duplicate" class="h-3.5 w-3.5" />
+                        <button type="button" wire:click="duplicateProject" wire:loading.attr="disabled"
+                            class="mt-4 inline-flex items-center gap-1.5 border border-indigo-300 bg-white px-3 py-2 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-700 dark:bg-gray-800 dark:text-indigo-300 dark:hover:bg-indigo-900/20">
+                            <span wire:loading.remove wire:target="duplicateProject"><x-user-projects::icon name="document-duplicate" class="h-3.5 w-3.5" /></span>
+                            <span wire:loading wire:target="duplicateProject"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
                             {{ __('user-projects::ui.duplicate_project') }}
                         </button>
                     </div>
@@ -544,9 +564,10 @@
                     </div>
                     <div class="p-4 sm:p-6 pt-0">
                         <p class="text-sm text-rose-600 dark:text-rose-300">{{ __('user-projects::ui.delete_project_description') }}</p>
-                        <button type="button" wire:click="deleteProject('{{ $project->getRouteKey() }}')" wire:confirm="{{ __('user-projects::ui.delete_project_confirm') }}"
-                            class="mt-4 inline-flex items-center gap-1.5 border border-rose-300 bg-white px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
-                            <x-user-projects::icon name="trash" class="h-3.5 w-3.5" />
+                        <button type="button" wire:click="deleteProject('{{ $project->getRouteKey() }}')" wire:confirm="{{ __('user-projects::ui.delete_project_confirm') }}" wire:loading.attr="disabled"
+                            class="mt-4 inline-flex items-center gap-1.5 border border-rose-300 bg-white px-3 py-2 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20">
+                            <span wire:loading.remove wire:target="deleteProject"><x-user-projects::icon name="trash" class="h-3.5 w-3.5" /></span>
+                            <span wire:loading wire:target="deleteProject"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
                             {{ __('user-projects::ui.delete_project') }}
                         </button>
                     </div>

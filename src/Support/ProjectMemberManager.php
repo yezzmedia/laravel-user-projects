@@ -51,6 +51,19 @@ final class ProjectMemberManager
             ->update(['role' => $role]);
     }
 
+    public function userCan(Project $project, mixed $user, string $permission): bool
+    {
+        $role = $this->memberRole($project, (int) $user->getAuthIdentifier());
+
+        if ($role === null) {
+            return false;
+        }
+
+        $perms = config('user-projects.default_role_permissions.'.$role, []);
+
+        return in_array($permission, $perms, true);
+    }
+
     public function isOwner(Project $project, int $userId): bool
     {
         return $project->members()

@@ -120,6 +120,16 @@
                             </button>
                         @endforeach
                     </div>
+                    @if ($pageData['hasMoreProjects'])
+                        <div class="mt-4 text-center">
+                            <button type="button" wire:click="loadMoreProjects" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-1.5 border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                                <span wire:loading.remove wire:target="loadMoreProjects"><x-user-projects::icon name="chevron-down" class="h-3.5 w-3.5" /></span>
+                                <span wire:loading wire:target="loadMoreProjects"><x-user-projects::icon name="loader" class="h-3.5 w-3.5 animate-spin" /></span>
+                                {{ __('user-projects::ui.load_more') }}
+                            </button>
+                        </div>
+                    @endif
                 @else
                     <x-user-projects::empty-state
                         :title="__('user-projects::ui.no_projects')"
@@ -148,6 +158,7 @@
             'pendingInvitations' => $pageData['pendingInvitations'] ?? collect(),
             'currentUserInvitation' => $pageData['currentUserInvitation'] ?? null,
             'activities' => $pageData['activities'] ?? collect(),
+            'activityTypes' => $pageData['activityTypes'] ?? [],
         ])
     @endif
 </div>

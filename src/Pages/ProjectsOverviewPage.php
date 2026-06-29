@@ -52,10 +52,22 @@ final class ProjectsOverviewPage extends UserProjectsPage
     #[Url]
     public bool $showArchived = false;
 
+    #[Url]
+    public int $projectPage = 1;
+
+    public string $activityFilter = '';
+
+    public bool $hasMoreProjects = false;
+
     public function selectProject(string $projectId): void
     {
         $this->project = $projectId;
         $this->activeTab = 'overview';
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->projectPage = 1;
     }
 
     public function backToList(): void
@@ -96,9 +108,8 @@ final class ProjectsOverviewPage extends UserProjectsPage
         }
 
         $memberManager = app(ProjectMemberManager::class);
-        $role = $memberManager->memberRole($project, (int) $user->getAuthIdentifier());
 
-        if (! in_array($role, ['owner', 'admin'], true)) {
+        if (! $memberManager->userCan($project, $user, 'manage_settings')) {
             session()->flash('error', __('user-projects::ui.cannot_edit_project'));
 
             return;
@@ -138,9 +149,8 @@ final class ProjectsOverviewPage extends UserProjectsPage
         }
 
         $memberManager = app(ProjectMemberManager::class);
-        $role = $memberManager->memberRole($project, (int) $user->getAuthIdentifier());
 
-        if (! in_array($role, ['owner', 'admin'], true)) {
+        if (! $memberManager->userCan($project, $user, 'manage_settings')) {
             session()->flash('error', __('user-projects::ui.cannot_edit_project'));
 
             return;
@@ -177,9 +187,8 @@ final class ProjectsOverviewPage extends UserProjectsPage
         }
 
         $memberManager = app(ProjectMemberManager::class);
-        $role = $memberManager->memberRole($project, (int) $user->getAuthIdentifier());
 
-        if (! in_array($role, ['owner', 'admin'], true)) {
+        if (! $memberManager->userCan($project, $user, 'manage_settings')) {
             return;
         }
 
@@ -207,11 +216,25 @@ final class ProjectsOverviewPage extends UserProjectsPage
     {
         $user = auth(config('user-projects.panel.guard', 'web'))->user();
 
+        if ($user === null) {
+            return;
+        }
+
         $resolved = app(ProjectManager::class)->findByIdentifier($projectId);
 
-        if ($resolved !== null) {
-            app(ProjectManager::class)->delete($resolved);
+        if ($resolved === null) {
+            return;
         }
+
+        $memberManager = app(ProjectMemberManager::class);
+
+        if (! $memberManager->userCan($resolved, $user, 'delete_project')) {
+            session()->flash('error', __('user-projects::ui.cannot_delete_project'));
+
+            return;
+        }
+
+        app(ProjectManager::class)->delete($resolved);
 
         $this->project = null;
         $this->activeTab = 'overview';
@@ -533,6 +556,12 @@ final class ProjectsOverviewPage extends UserProjectsPage
     public function toggleArchived(): void
     {
         $this->showArchived = ! $this->showArchived;
+        $this->projectPage = 1;
+    }
+
+    public function loadMoreProjects(): void
+    {
+        $this->projectPage++;
     }
 
     public function duplicateProject(): void
@@ -544,7 +573,15 @@ final class ProjectsOverviewPage extends UserProjectsPage
             return;
         }
 
-        $copy = app(ProjectManager::class)->duplicate($project, $user, '(Copy)');
+        $memberManager = app(ProjectMemberManager::class);
+
+        if (! $memberManager->userCan($project, $user, 'create_project')) {
+            session()->flash('error', __('user-projects::ui.cannot_duplicate_project'));
+
+            return;
+        }
+
+        app(ProjectManager::class)->duplicate($project, $user, '(Copy)');
 
         session()->flash('success', __('user-projects::ui.project_duplicated'));
     }
@@ -651,9 +688,15 @@ final class ProjectsOverviewPage extends UserProjectsPage
             $assignableRoles = $memberManager->assignableRoles($this->resolvedProject, (int) $user->getAuthIdentifier());
             $pendingInvitations = $memberManager->pendingInvitationsForProject($this->resolvedProject);
             $currentUserInvitation = $memberManager->pendingInvitationForProjectAndUser($this->resolvedProject, $user);
-            $activities = ProjectActivity::query()
+            $activityQuery = ProjectActivity::query()
                 ->where('project_id', $this->resolvedProject->id)
-                ->with('user')
+                ->with('user');
+
+            if ($this->activityFilter !== '') {
+                $activityQuery->where('type', $this->activityFilter);
+            }
+
+            $activities = $activityQuery
                 ->latest('created_at')
                 ->take(50)
                 ->get();
@@ -681,10 +724,24 @@ final class ProjectsOverviewPage extends UserProjectsPage
             'currentUserInvitation' => $currentUserInvitation,
             'userPendingInvitations' => $userPendingInvitations,
             'activities' => $activities,
+            'activityFilter' => $this->activityFilter,
+            'activityTypes' => [
+                '' => __('user-projects::ui.all_activities'),
+                'project_created' => __('user-projects::ui.activity_project_created_short'),
+                'project_updated' => __('user-projects::ui.activity_project_updated_short'),
+                'member_invited' => __('user-projects::ui.activity_member_invited_short'),
+                'member_accepted' => __('user-projects::ui.activity_member_accepted_short'),
+                'member_declined' => __('user-projects::ui.activity_member_declined_short'),
+                'member_removed' => __('user-projects::ui.activity_member_removed_short'),
+                'role_changed' => __('user-projects::ui.activity_role_changed_short'),
+                'member_left' => __('user-projects::ui.activity_member_left_short'),
+                'member_invitation_cancelled' => __('user-projects::ui.activity_invitation_cancelled_short'),
+            ],
             'search' => $this->search,
             'sortField' => $this->sortField,
             'sortDirection' => $this->sortDirection,
             'showArchived' => $this->showArchived,
+            'hasMoreProjects' => $this->hasMoreProjects,
         ];
     }
 
@@ -712,7 +769,16 @@ final class ProjectsOverviewPage extends UserProjectsPage
             default => $p->created_at->timestamp,
         }, SORT_REGULAR, $sortDirection === 'desc');
 
-        return $projects->values();
+        $projects = $projects->values();
+
+        $limit = (int) config('user-projects.projects.display_limit', 25);
+        $total = $projects->count();
+
+        $projects = $projects->forPage($this->projectPage, $limit);
+
+        $this->hasMoreProjects = ($this->projectPage * $limit) < $total;
+
+        return $projects;
     }
 
     public function getResolvedProjectProperty(): ?Project

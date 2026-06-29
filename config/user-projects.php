@@ -33,6 +33,10 @@ return [
         ],
     ],
 
+    'stats' => [
+        'cache_ttl' => 3600,
+    ],
+
     'permissions' => [
         'create_project',
         'edit_project',
