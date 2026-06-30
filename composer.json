@@ -16,9 +16,9 @@
         "illuminate/contracts": "^13.0",
         "illuminate/support": "^13.0",
         "spatie/laravel-package-tools": "^1.93",
-        "yezzmedia/laravel-access": "*@dev",
-        "yezzmedia/laravel-dashboard": "*@dev",
-        "yezzmedia/laravel-foundation": "*@dev"
+        "yezzmedia/laravel-access": "^0.2",
+        "yezzmedia/laravel-dashboard": "^0.2",
+        "yezzmedia/laravel-foundation": "^0.2"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
