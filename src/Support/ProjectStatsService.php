@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace YezzMedia\UserProjects\Support;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -59,17 +60,20 @@ final readonly class ProjectStatsService
 
     public function projectsByStatus(): Collection
     {
-        return Cache::remember($this->cacheKey(__FUNCTION__), $this->ttl(), fn (): Collection => Project::query()
+        $cached = Cache::remember($this->cacheKey(__FUNCTION__), $this->ttl(), fn (): array => Project::query()
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->orderBy('status')
             ->get()
-            ->mapWithKeys(fn ($row) => [$row->status => $row->count]));
+            ->mapWithKeys(fn ($row) => [$row->status => $row->count])
+            ->all());
+
+        return collect($cached);
     }
 
     public function projectsCreatedPerMonth(int $months = 12): Collection
     {
-        return Cache::remember($this->cacheKey(__FUNCTION__, $months), $this->ttl(), function () use ($months): Collection {
+        $cached = Cache::remember($this->cacheKey(__FUNCTION__, $months), $this->ttl(), function () use ($months): array {
             $connection = DB::connection()->getDriverName();
 
             $dateExpr = match ($connection) {
@@ -84,32 +88,47 @@ final readonly class ProjectStatsService
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()
-                ->mapWithKeys(fn ($row) => [$row->month => $row->count]);
+                ->mapWithKeys(fn ($row) => [$row->month => $row->count])
+                ->all();
         });
+
+        return collect($cached);
     }
 
     public function memberRoleDistribution(): Collection
     {
-        return Cache::remember($this->cacheKey(__FUNCTION__), $this->ttl(), fn (): Collection => ProjectMember::query()
+        $cached = Cache::remember($this->cacheKey(__FUNCTION__), $this->ttl(), fn (): array => ProjectMember::query()
             ->selectRaw('role, COUNT(*) as count')
             ->groupBy('role')
             ->orderBy('role')
             ->get()
-            ->mapWithKeys(fn ($row) => [$row->role => $row->count]));
+            ->mapWithKeys(fn ($row) => [$row->role => $row->count])
+            ->all());
+
+        return collect($cached);
     }
 
     public function topProjectsByMembers(int $limit = 5): Collection
     {
-        return Cache::remember($this->cacheKey(__FUNCTION__, $limit), $this->ttl(), fn (): Collection => Project::query()
+        $cached = Cache::remember($this->cacheKey(__FUNCTION__, $limit), $this->ttl(), fn (): array => Project::query()
             ->withCount('members')
             ->orderByDesc('members_count')
             ->limit($limit)
-            ->get(['id', 'name', 'status']));
+            ->get(['id', 'name', 'status'])
+            ->map(fn (Project $p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'status' => $p->status,
+                'members_count' => $p->members_count,
+            ])
+            ->all());
+
+        return collect($cached)->map(fn (array $v): \stdClass => (object) $v);
     }
 
     public function projectsByOwner(): Collection
     {
-        return Cache::remember($this->cacheKey(__FUNCTION__), $this->ttl(), fn (): Collection => Project::query()
+        $cached = Cache::remember($this->cacheKey(__FUNCTION__), $this->ttl(), fn (): array => Project::query()
             ->selectRaw('owner_id, COUNT(*) as project_count')
             ->groupBy('owner_id')
             ->orderByDesc('project_count')
@@ -118,17 +137,42 @@ final readonly class ProjectStatsService
             ->map(fn ($row) => [
                 'user' => $row->owner?->name ?? $row->owner?->email ?? "User #{$row->owner_id}",
                 'count' => $row->project_count,
-            ]));
+            ])
+            ->all());
+
+        return collect($cached);
     }
 
     public function latestProjects(int $limit = 5): Collection
     {
-        return Cache::remember($this->cacheKey(__FUNCTION__, $limit), $this->ttl(), fn (): Collection => Project::query()
+        $cached = Cache::remember($this->cacheKey(__FUNCTION__, $limit), $this->ttl(), fn (): array => Project::query()
             ->with('owner')
             ->withCount('members')
             ->orderByDesc('created_at')
             ->limit($limit)
-            ->get());
+            ->get()
+            ->map(fn (Project $p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'members_count' => $p->members_count,
+                'created_at' => $p->created_at instanceof \DateTimeInterface ? $p->created_at->toISOString() : $p->created_at,
+                'owner' => $p->relationLoaded('owner') && $p->owner ? [
+                    'name' => $p->owner->name,
+                ] : null,
+            ])
+            ->all());
+
+        return collect($cached)->map(function (array $v): \stdClass {
+            if (isset($v['created_at'])) {
+                $v['created_at'] = Carbon::parse($v['created_at']);
+            }
+
+            if (isset($v['owner']) && is_array($v['owner'])) {
+                $v['owner'] = (object) $v['owner'];
+            }
+
+            return (object) $v;
+        });
     }
 
     public function newlyCreatedToday(): int
