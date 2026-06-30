@@ -56,7 +56,7 @@ it('defines install steps', function (): void {
     $package = app(UserProjectsPlatformPackage::class);
     $steps = $package->installSteps();
 
-    expect($steps)->toHaveCount(2);
+    expect($steps)->toHaveCount(3);
 });
 
 it('defines doctor checks', function (): void {
