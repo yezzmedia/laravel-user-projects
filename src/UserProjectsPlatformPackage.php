@@ -20,6 +20,7 @@ use YezzMedia\UserProjects\Doctor\ProjectConfigPublishedCheck;
 use YezzMedia\UserProjects\Doctor\ProjectSchemaReadyCheck;
 use YezzMedia\UserProjects\Install\EnsureProjectSchemaReadyInstallStep;
 use YezzMedia\UserProjects\Install\PublishProjectConfigInstallStep;
+use YezzMedia\UserProjects\Install\PublishProjectMigrationsInstallStep;
 
 final class UserProjectsPlatformPackage implements DefinesAuditEvents, DefinesInstallSteps, DefinesPermissions, DefinesRateLimiters, PlatformPackage, ProvidesDoctorChecks, RegistersFeatures
 {
@@ -217,6 +218,7 @@ final class UserProjectsPlatformPackage implements DefinesAuditEvents, DefinesIn
     {
         return [
             app(PublishProjectConfigInstallStep::class),
+            app(PublishProjectMigrationsInstallStep::class),
             app(EnsureProjectSchemaReadyInstallStep::class),
         ];
     }
