@@ -39,6 +39,11 @@ final class Project extends Model
         return $this->hasMany(ProjectMember::class);
     }
 
+    public function activities(): HasMany
+    {
+        return $this->hasMany(ProjectActivity::class);
+    }
+
     public function getPhotoUrlAttribute(): ?string
     {
         if ($this->photo_path === null) {
